@@ -1,0 +1,105 @@
+import { Request, Response, NextFunction } from 'express';
+import { query } from '../config/db';
+import catchAsync from '../utils/catchAsync';
+import AppError from '../utils/AppError';
+
+export const getFlavors = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { product_id, status } = req.query;
+  
+  const queryParams: any[] = [];
+  const whereClauses: string[] = [];
+
+  if (product_id) {
+    queryParams.push(product_id);
+    whereClauses.push(`product_id = $${queryParams.length}`);
+  }
+
+  if (status) {
+    queryParams.push(status);
+    whereClauses.push(`status = $${queryParams.length}`);
+  } else if (req.query.admin !== 'true') {
+    whereClauses.push("status = 'active'");
+  }
+
+  const whereSql = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
+  const sql = `SELECT * FROM flavors ${whereSql} ORDER BY flavor_name ASC`;
+
+  const flavorsResult = await query(sql, queryParams);
+
+  return res.status(200).json({
+    status: 'success',
+    results: flavorsResult.rowCount,
+    data: {
+      flavors: flavorsResult.rows,
+    },
+  });
+});
+
+export const createFlavor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { product_id, flavor_name, status } = req.body;
+
+  // Check product exists
+  const prodCheck = await query('SELECT id FROM products WHERE id = $1', [product_id]);
+  if (prodCheck.rowCount === 0) {
+    return next(new AppError('Associated product not found', 404));
+  }
+
+  const result = await query(
+    `INSERT INTO flavors (product_id, flavor_name, status)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
+    [product_id, flavor_name, status || 'active']
+  );
+
+  return res.status(201).json({
+    status: 'success',
+    data: {
+      flavor: result.rows[0],
+    },
+  });
+});
+
+export const updateFlavor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+  const { flavor_name, status } = req.body;
+
+  // Check flavor exists
+  const checkRes = await query('SELECT * FROM flavors WHERE id = $1', [id]);
+  const flavor = checkRes.rows[0];
+  if (!flavor) {
+    return next(new AppError('Flavor not found', 404));
+  }
+
+  const updatedName = flavor_name !== undefined ? flavor_name : flavor.flavor_name;
+  const updatedStatus = status !== undefined ? status : flavor.status;
+
+  const result = await query(
+    `UPDATE flavors
+     SET flavor_name = $1, status = $2, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $3
+     RETURNING *`,
+    [updatedName, updatedStatus, id]
+  );
+
+  return res.status(200).json({
+    status: 'success',
+    data: {
+      flavor: result.rows[0],
+    },
+  });
+});
+
+export const deleteFlavor = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { id } = req.params;
+
+  const deleteRes = await query('DELETE FROM flavors WHERE id = $1 RETURNING id', [id]);
+
+  if (deleteRes.rowCount === 0) {
+    return next(new AppError('Flavor not found', 404));
+  }
+
+  return res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});
