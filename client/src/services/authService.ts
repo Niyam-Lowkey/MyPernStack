@@ -24,6 +24,11 @@ export interface MeResponse {
 }
 
 export const authService = {
+  register: async (data: { name: string; email: string; password: string }): Promise<LoginResponse> => {
+    const response = await api.post('/auth/register', data);
+    return response.data;
+  },
+
   login: async (credentials: { email: string; password?: string; rememberMe?: boolean }): Promise<LoginResponse> => {
     const response = await api.post('/auth/login', credentials);
     return response.data;

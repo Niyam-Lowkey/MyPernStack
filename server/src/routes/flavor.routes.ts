@@ -11,8 +11,8 @@ import { createFlavorSchema, updateFlavorSchema } from '../validators/flavor.val
 
 const router = Router();
 
-// Public routes
-router.get('/', getFlavors);
+// Authenticated routes (login required for all users)
+router.get('/', protect as any, getFlavors);
 
 // Admin-only routes
 router.post('/', protect as any, restrictTo('admin') as any, validate(createFlavorSchema), createFlavor);

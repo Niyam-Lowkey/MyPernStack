@@ -12,9 +12,9 @@ import { createProductSchema, updateProductSchema } from '../validators/product.
 
 const router = Router();
 
-// Public routes
-router.get('/', getProducts);
-router.get('/:idOrSlug', getProductByIdOrSlug);
+// Authenticated routes (login required for all users)
+router.get('/', protect as any, getProducts);
+router.get('/:idOrSlug', protect as any, getProductByIdOrSlug);
 
 // Admin-only routes
 router.post('/', protect as any, restrictTo('admin') as any, validate(createProductSchema), createProduct);

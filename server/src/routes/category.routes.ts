@@ -12,9 +12,9 @@ import { createCategorySchema, updateCategorySchema } from '../validators/catego
 
 const router = Router();
 
-// Public routes
-router.get('/', getCategories);
-router.get('/:idOrSlug', getCategoryByIdOrSlug);
+// Authenticated routes (login required for all users)
+router.get('/', protect as any, getCategories);
+router.get('/:idOrSlug', protect as any, getCategoryByIdOrSlug);
 
 // Admin-only routes
 router.post('/', protect as any, restrictTo('admin') as any, validate(createCategorySchema), createCategory);
