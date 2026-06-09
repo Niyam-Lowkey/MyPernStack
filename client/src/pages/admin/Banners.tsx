@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { catalogService, Banner } from '../../services/catalogService';
+import { catalogService } from '../../services/catalogService';
+import type { Banner } from '../../services/catalogService';
 import adminService from '../../services/adminService';
 import { Plus, Pencil, Trash2, X, Upload, Save, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -123,9 +124,9 @@ export const Banners: React.FC = () => {
 
     const payload = {
       title,
-      subtitle: subtitle || null,
+      subtitle: subtitle || undefined,
       image_url: imageUrl,
-      link_url: linkUrl || null,
+      link_url: linkUrl || undefined,
       sort_order: parseInt(sortOrder, 10) || 0,
       is_active: isActive,
     };

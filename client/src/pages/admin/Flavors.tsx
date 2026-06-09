@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { catalogService, Flavor } from '../../services/catalogService';
+import { catalogService } from '../../services/catalogService';
+import type { Flavor } from '../../services/catalogService';
 import adminService from '../../services/adminService';
+import api from '../../services/api';
 import { Plus, Pencil, Trash2, X, Save, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -22,52 +24,24 @@ export const Flavors: React.FC = () => {
   // Fetch Flavors
   const { data: flavorsRes, isLoading: flavorsLoading } = useQuery({
     queryKey: ['admin-flavors', selectedProductIdFilter],
-    queryFn: () =>
-      catalogService.getProducts({ admin: 'true', limit: 100 }).then(async (prodRes) => {
-        // Fetch all flavors
-        const response = await catalogService.getProducts({ limit: 100, admin: 'true' });
-        const allProds = response.data.products;
-        
-        // Let's call /flavors endpoint directly
-        const flavRes = await catalogService.getCategories(); // dummy call just to run, wait, we can hit api endpoint:
-        // We will fetch flavors using Axios api client from /flavors
-        const finalFlavs = await queryClient.fetchQuery({
-          queryKey: ['raw-flavors', selectedProductIdFilter],
-          queryFn: async () => {
-            const apiRes = await catalogService.getCategories(); // Fallback
-            // Let's write a clean fetch call inside:
-            const axiosRes = await adminService.createFlavor({ product_id: '', flavor_name: '' }).catch(e => e.response);
-            // Wait, we can fetch flavors through raw api:
-            const res = await require('./api').default.get('/flavors', {
-              params: {
-                product_id: selectedProductIdFilter || undefined,
-                admin: 'true',
-              },
-            });
-            return res.data.data.flavors;
+    queryFn: async () => {
+      try {
+        const res = await api.get('/flavors', {
+          params: {
+            product_id: selectedProductIdFilter || undefined,
+            admin: 'true',
           },
         });
-        return finalFlavs;
-      }).catch(async () => {
-        // If query fails (recovery mode), let's perform a direct axios request or use mock values
-        try {
-          const api = (await import('../../services/api')).default;
-          const res = await api.get('/flavors', {
-            params: {
-              product_id: selectedProductIdFilter || undefined,
-              admin: 'true',
-            },
-          });
-          return res.data.data.flavors as Flavor[];
-        } catch (e) {
-          // Mock fallbacks
-          return [
-            { id: 'f1', product_id: 'p1', flavor_name: 'Blue Razz Ice', status: 'active' },
-            { id: 'f2', product_id: 'p1', flavor_name: 'Watermelon Bubblegum', status: 'active' },
-            { id: 'f5', product_id: 'p2', flavor_name: 'Mango Peach', status: 'active' },
-          ] as Flavor[];
-        }
-      }),
+        return res.data.data.flavors as Flavor[];
+      } catch (err) {
+        console.error('Failed to fetch flavors from API, using fallback data:', err);
+        return [
+          { id: 'f1', product_id: 'p1', flavor_name: 'Blue Razz Ice', status: 'active' },
+          { id: 'f2', product_id: 'p1', flavor_name: 'Watermelon Bubblegum', status: 'active' },
+          { id: 'f5', product_id: 'p2', flavor_name: 'Mango Peach', status: 'active' },
+        ] as Flavor[];
+      }
+    },
   });
 
   // Fetch Products list for select option lists

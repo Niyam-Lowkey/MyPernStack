@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { catalogService, Product } from '../services/catalogService';
-import { ShieldCheck, ArrowLeft, RefreshCw, Layers, Sparkles, Check, Heart, HelpCircle } from 'lucide-react';
+import { catalogService } from '../services/catalogService';
+import type { Product } from '../services/catalogService';
+import { ShieldCheck, ArrowLeft, Layers, Sparkles, HelpCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Mock product detail values as fallback
@@ -137,7 +138,7 @@ export const ProductDetails: React.FC = () => {
   const [selectedFlavor, setSelectedFlavor] = useState<string>('');
 
   // Main Query
-  const { data: productRes, isLoading, error } = useQuery({
+  const { data: productRes, isLoading } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => catalogService.getProduct(slug || ''),
     enabled: !!slug,

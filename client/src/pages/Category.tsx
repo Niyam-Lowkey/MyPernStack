@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { catalogService, Product } from '../services/catalogService';
+import { catalogService } from '../services/catalogService';
+import type { Product } from '../services/catalogService';
 import { SlidersHorizontal, Search, RotateCcw, AlertTriangle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -90,14 +91,14 @@ export const Category: React.FC = () => {
   const [showFiltersMobile, setShowFiltersMobile] = useState(false);
 
   // Queries
-  const { data: categoryRes, isLoading: catLoading } = useQuery({
+  const { data: categoryRes } = useQuery({
     queryKey: ['category', slug],
     queryFn: () => catalogService.getCategory(slug || ''),
     enabled: !!slug,
     retry: 1,
   });
 
-  const { data: productsRes, isLoading: prodsLoading, refetch } = useQuery({
+  const { data: productsRes, isLoading: prodsLoading } = useQuery({
     queryKey: ['products', slug, searchTerm, availability, nicotine, puffMin],
     queryFn: () =>
       catalogService.getProducts({

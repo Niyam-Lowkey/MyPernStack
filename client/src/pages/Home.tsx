@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { catalogService, Product, Category, Banner } from '../services/catalogService';
+import { catalogService } from '../services/catalogService';
+import type { Product, Category, Banner } from '../services/catalogService';
 import { ArrowRight, ChevronLeft, ChevronRight, Zap, Sparkles, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -112,19 +113,19 @@ export const Home: React.FC = () => {
   const [activeBanner, setActiveBanner] = React.useState(0);
 
   // Queries
-  const { data: bannersData, isLoading: bannersLoading } = useQuery({
+  const { data: bannersData } = useQuery({
     queryKey: ['banners'],
     queryFn: () => catalogService.getBanners(),
     retry: 1,
   });
 
-  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+  const { data: categoriesData } = useQuery({
     queryKey: ['categories'],
     queryFn: () => catalogService.getCategories(),
     retry: 1,
   });
 
-  const { data: productsData, isLoading: productsLoading } = useQuery({
+  const { data: productsData } = useQuery({
     queryKey: ['featured-products'],
     queryFn: () => catalogService.getProducts({ limit: 4 }),
     retry: 1,

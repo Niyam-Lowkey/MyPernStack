@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { catalogService, Category } from '../../services/catalogService';
+import { catalogService } from '../../services/catalogService';
+import type { Category } from '../../services/catalogService';
 import adminService from '../../services/adminService';
-import { Plus, Pencil, Trash2, X, Upload, Save, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, X, Upload, Save, AlertTriangle, FolderTree } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const Categories: React.FC = () => {
@@ -117,8 +118,8 @@ export const Categories: React.FC = () => {
 
     const payload = {
       name,
-      description: description || null,
-      image: image || null,
+      description: description || undefined,
+      image: image || undefined,
       status,
     };
 

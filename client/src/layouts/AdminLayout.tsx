@@ -7,7 +7,6 @@ import {
   Layers,
   Image,
   LogOut,
-  User,
   Menu,
   X,
   ChevronRight,
