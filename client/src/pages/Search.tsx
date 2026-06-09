@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { catalogService, Product } from '../services/catalogService';
-import { Search as SearchIcon, AlertTriangle, ArrowRight, Zap } from 'lucide-react';
+import { catalogService } from '../services/catalogService';
+import type { Product } from '../services/catalogService';
+import { Search as SearchIcon, AlertTriangle, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 

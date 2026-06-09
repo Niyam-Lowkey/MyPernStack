@@ -1,5 +1,5 @@
 import api from './api';
-import { Category, Product, Flavor, Banner } from './catalogService';
+import type { Category, Product, Flavor, Banner } from './catalogService';
 
 export const adminService = {
   // Categories CRUD

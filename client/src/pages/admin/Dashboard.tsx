@@ -6,13 +6,13 @@ import { motion } from 'framer-motion';
 
 export const Dashboard: React.FC = () => {
   // Fetch lists to calculate metrics
-  const { data: prodsRes, isLoading: prodsLoading } = useQuery({
+  const { data: prodsRes } = useQuery({
     queryKey: ['admin-products-count'],
     queryFn: () => catalogService.getProducts({ limit: 100, admin: 'true' }),
     retry: 1,
   });
 
-  const { data: catsRes, isLoading: catsLoading } = useQuery({
+  const { data: catsRes } = useQuery({
     queryKey: ['admin-categories-count'],
     queryFn: () => catalogService.getCategories(true),
     retry: 1,
