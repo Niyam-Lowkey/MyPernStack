@@ -5,6 +5,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import AdminLayout from '../layouts/AdminLayout';
 
+// Auth Guard
+import ProtectedRoute from './ProtectedRoute';
+
 // Public Pages
 import Home from '../pages/Home';
 import Category from '../pages/Category';
@@ -22,13 +25,17 @@ import Banners from '../pages/admin/Banners';
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      {/* Public Routes under MainLayout */}
+      {/* Login page - accessible without auth */}
+      <Route path="/login" element={<MainLayout />}>
+        <Route index element={<Login />} />
+      </Route>
+
+      {/* Customer Routes - login required */}
       <Route path="/" element={<MainLayout />}>
-        <Route index element={<Home />} />
-        <Route path="category/:slug" element={<Category />} />
-        <Route path="product/:slug" element={<ProductDetails />} />
-        <Route path="search" element={<Search />} />
-        <Route path="login" element={<Login />} />
+        <Route index element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="category/:slug" element={<ProtectedRoute><Category /></ProtectedRoute>} />
+        <Route path="product/:slug" element={<ProtectedRoute><ProductDetails /></ProtectedRoute>} />
+        <Route path="search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
       </Route>
 
       {/* Admin Protected Routes under AdminLayout */}
@@ -47,3 +54,4 @@ export const AppRoutes: React.FC = () => {
 };
 
 export default AppRoutes;
+
