@@ -6,6 +6,58 @@ import AppError from '../utils/AppError';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '../utils/jwt';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
+export const register = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { name, email, password } = req.body;
+
+  // 1. Check if user already exists
+  const existingUser = await query(
+    'SELECT id FROM users WHERE email = $1',
+    [email.toLowerCase().trim()]
+  );
+
+  if (existingUser.rows.length > 0) {
+    return next(new AppError('An account with this email already exists', 409));
+  }
+
+  // 2. Hash password
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  // 3. Create user with 'customer' role
+  const newUser = await query(
+    `INSERT INTO users (name, email, password_hash, role, is_active)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role`,
+    [name.trim(), email.toLowerCase().trim(), passwordHash, 'customer', true]
+  );
+
+  const user = newUser.rows[0];
+
+  // 4. Generate tokens
+  const accessToken = generateAccessToken(user);
+  const refreshToken = generateRefreshToken(user);
+
+  // 5. Set Refresh Token in Cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  // 6. Send response
+  return res.status(201).json({
+    status: 'success',
+    data: {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+    },
+  });
+});
+
 export const login = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const { email, password, rememberMe } = req.body;
 

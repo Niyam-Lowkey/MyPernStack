@@ -9,8 +9,8 @@ import { protect, restrictTo } from '../middlewares/auth.middleware';
 
 const router = Router();
 
-// Public routes
-router.get('/', getBanners);
+// Authenticated routes (login required for all users)
+router.get('/', protect as any, getBanners);
 
 // Admin-only routes
 router.post('/', protect as any, restrictTo('admin') as any, createBanner);

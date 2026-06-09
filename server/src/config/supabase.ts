@@ -1,18 +1,34 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import {
+  createServerClient,
+  parseCookieHeader,
+  serializeCookieHeader,
+} from "@supabase/ssr";
 
-dotenv.config();
+export function createClient(request: Request) {
+  const headers = new Headers();
 
-const supabaseUrl = process.env.SUPABASE_URL!;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  const supabase = createServerClient(
+    process.env.SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return parseCookieHeader(request.headers.get("Cookie") ?? "") as {
+            name: string;
+            value: string;
+          }[];
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            headers.append(
+              "Set-Cookie",
+              serializeCookieHeader(name, value, options)
+            )
+          );
+        },
+      },
+    }
+  );
 
-// Admin client — uses service_role key, bypasses RLS.
-// ONLY use server-side. NEVER expose to frontend.
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false,
-  },
-});
-
-export default supabaseAdmin;
+  return { supabase, headers };
+}
