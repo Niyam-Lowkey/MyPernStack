@@ -3,12 +3,49 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getMe = exports.logout = exports.refresh = exports.login = void 0;
+exports.getMe = exports.logout = exports.refresh = exports.login = exports.register = void 0;
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const db_1 = require("../config/db");
 const catchAsync_1 = __importDefault(require("../utils/catchAsync"));
 const AppError_1 = __importDefault(require("../utils/AppError"));
 const jwt_1 = require("../utils/jwt");
+exports.register = (0, catchAsync_1.default)(async (req, res, next) => {
+    const { name, email, password } = req.body;
+    // 1. Check if user already exists
+    const existingUser = await (0, db_1.query)('SELECT id FROM users WHERE email = $1', [email.toLowerCase().trim()]);
+    if (existingUser.rows.length > 0) {
+        return next(new AppError_1.default('An account with this email already exists', 409));
+    }
+    // 2. Hash password
+    const passwordHash = await bcryptjs_1.default.hash(password, 10);
+    // 3. Create user with 'customer' role
+    const newUser = await (0, db_1.query)(`INSERT INTO users (name, email, password_hash, role, is_active)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, role`, [name.trim(), email.toLowerCase().trim(), passwordHash, 'customer', true]);
+    const user = newUser.rows[0];
+    // 4. Generate tokens
+    const accessToken = (0, jwt_1.generateAccessToken)(user);
+    const refreshToken = (0, jwt_1.generateRefreshToken)(user);
+    // 5. Set Refresh Token in Cookie
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    // 6. Send response
+    return res.status(201).json({
+        status: 'success',
+        data: {
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                role: user.role,
+            },
+            accessToken,
+        },
+    });
+});
 exports.login = (0, catchAsync_1.default)(async (req, res, next) => {
     const { email, password, rememberMe } = req.body;
     // 1. Fetch user from DB

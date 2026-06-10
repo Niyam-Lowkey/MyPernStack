@@ -1,20 +1,18 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.supabaseAdmin = void 0;
-const supabase_js_1 = require("@supabase/supabase-js");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-// Admin client — uses service_role key, bypasses RLS.
-// ONLY use server-side. NEVER expose to frontend.
-exports.supabaseAdmin = (0, supabase_js_1.createClient)(supabaseUrl, supabaseServiceRoleKey, {
-    auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-    },
-});
-exports.default = exports.supabaseAdmin;
+exports.createClient = createClient;
+const ssr_1 = require("@supabase/ssr");
+function createClient(request) {
+    const headers = new Headers();
+    const supabase = (0, ssr_1.createServerClient)(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+        cookies: {
+            getAll() {
+                return (0, ssr_1.parseCookieHeader)(request.headers.get("Cookie") ?? "");
+            },
+            setAll(cookiesToSet) {
+                cookiesToSet.forEach(({ name, value, options }) => headers.append("Set-Cookie", (0, ssr_1.serializeCookieHeader)(name, value, options)));
+            },
+        },
+    });
+    return { supabase, headers };
+}

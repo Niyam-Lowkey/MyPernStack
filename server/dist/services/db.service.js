@@ -26,7 +26,7 @@ const initializeDatabase = async () => {
             const adminPasswordHash = await bcryptjs_1.default.hash('AdminPassword123!', 10);
             // 1. Seed Admin User
             const adminResult = await client.query(`INSERT INTO users (name, email, password_hash, role, is_active)
-         VALUES ($1, $2, $3, $4, $5) RETURNING id`, ['System Administrator', 'admin@vapeco.com', adminPasswordHash, 'admin', true]);
+   VALUES ($1, $2, $3, $4, $5) RETURNING id`, ['System Administrator', 'admin@vapeco.com', adminPasswordHash, 'admin', true]);
             const adminId = adminResult.rows[0].id;
             console.log(`Seeded admin user: admin@vapeco.com (ID: ${adminId})`);
             // 2. Seed Homepage Banners
