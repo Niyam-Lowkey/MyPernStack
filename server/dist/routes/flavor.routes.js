@@ -9,8 +9,8 @@ const auth_middleware_1 = require("../middlewares/auth.middleware");
 const validate_middleware_1 = __importDefault(require("../middlewares/validate.middleware"));
 const flavor_validator_1 = require("../validators/flavor.validator");
 const router = (0, express_1.Router)();
-// Public routes
-router.get('/', flavor_controller_1.getFlavors);
+// Authenticated routes (login required for all users)
+router.get('/', auth_middleware_1.protect, flavor_controller_1.getFlavors);
 // Admin-only routes
 router.post('/', auth_middleware_1.protect, (0, auth_middleware_1.restrictTo)('admin'), (0, validate_middleware_1.default)(flavor_validator_1.createFlavorSchema), flavor_controller_1.createFlavor);
 router.put('/:id', auth_middleware_1.protect, (0, auth_middleware_1.restrictTo)('admin'), (0, validate_middleware_1.default)(flavor_validator_1.updateFlavorSchema), flavor_controller_1.updateFlavor);
