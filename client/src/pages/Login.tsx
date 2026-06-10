@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -292,13 +292,13 @@ export const Login: React.FC = () => {
   const tabs: { id: Tab; label: string }[] = [
     { id: 'customer', label: 'Sign In' },
     { id: 'register', label: 'Register' },
-    { id: 'admin',    label: 'Admin' },
+    { id: 'admin', label: 'Admin' },
   ];
 
   const headings: Record<Tab, { title: string; subtitle: string }> = {
     customer: { title: 'Welcome back', subtitle: 'Sign in to browse the VapeCo catalog.' },
     register: { title: 'Create account', subtitle: 'Join VapeCo to explore our products.' },
-    admin:    { title: 'Admin Portal',   subtitle: 'Restricted access — authorised staff only.' },
+    admin: { title: 'Admin Portal', subtitle: 'Restricted access — authorised staff only.' },
   };
 
   return (
@@ -328,13 +328,12 @@ export const Login: React.FC = () => {
               <button
                 key={t.id}
                 onClick={() => setTab(t.id)}
-                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${
-                  tab === t.id
-                    ? t.id === 'admin'
-                      ? 'bg-amber-500 text-white shadow'
-                      : 'bg-primary text-primary-foreground shadow'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
+                className={`flex-1 py-2 text-xs font-semibold rounded-xl transition-all ${tab === t.id
+                  ? t.id === 'admin'
+                    ? 'bg-amber-500 text-white shadow'
+                    : 'bg-primary text-primary-foreground shadow'
+                  : 'text-muted-foreground hover:text-foreground'
+                  }`}
               >
                 {t.label}
               </button>
